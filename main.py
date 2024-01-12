@@ -11,7 +11,6 @@ st.set_page_config(
     page_icon="🧊",
     layout="wide",
     initial_sidebar_state="expanded",
-    background_color="#000000",
 )
 
 scale_color = px.colors.qualitative.Pastel
