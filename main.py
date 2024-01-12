@@ -1186,6 +1186,33 @@ def page_momento_accidente():
     col3.plotly_chart(fig_dia_mes, use_container_width=True)
     col4.plotly_chart(fig_dia_semana, use_container_width=True)
 
+def page_momento_accidente2():
+    st.title("Distribución accidente por momento del día")
+    # Cargar datos
+    data = load_data()
+
+    # filtrar por numero expediente
+    data2 = data.groupby(["Numero_expedient"]).first().reset_index()
+
+    # Obtener la lista única de años en los datos
+    available_years = sorted(data2["NK_Any"].unique())
+
+    available_months = sorted(data2["Mes_any"].unique())
+
+    # Checkbox para seleccionar los años
+    selected_years = st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years)
+
+    # Checkbox para seleccionar los años
+    selected_months = st.sidebar.slider("Seleccionar Meses", min_value=1, max_value=12, value=(1, 12))
+
+    primer_mes = selected_months[0]
+    ultimo_mes = selected_months[1]
+    lista_meses_seleccionados = list(range(primer_mes, ultimo_mes + 1))
+
+    data2 = data2[data2["NK_Any"].isin(selected_years)]
+
+    data2 = data2[data2["Mes_any"].isin(lista_meses_seleccionados)]
+
     # Filtrar los datos según sea necesario
     filtered_data = data2[data2["Descripcio_dia_setmana"].notnull()]
 
@@ -1315,7 +1342,8 @@ def main():
         "Accidentes por tipos de persona": page_personas,
         "Mapa accidentes": page_mapa,
         "Distritos y barrios": page_distritos_barrios,
-        "Momento del accidente": page_momento_accidente,
+        "Momento del accidente (I)": page_momento_accidente,
+        "Momento del accidente (II)": page_momento_accidente2,
         "Victimización": page_victimizacion,
     }
 
