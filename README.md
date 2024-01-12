@@ -1,2 +1,2 @@
 # PRAVD
-Práctiv
+Práctia de Visualización de Datos (UOC)
