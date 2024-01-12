@@ -11,6 +11,7 @@ st.set_page_config(
     page_icon="🧊",
     layout="wide",
     initial_sidebar_state="expanded",
+    background_color="#000000",
 )
 
 scale_color = px.colors.qualitative.Pastel
@@ -1075,7 +1076,7 @@ def page_distritos_barrios():
 
 
 def page_momento_accidente():
-    st.title("Distribución accidente por momento del día")
+    st.title("Distribución accidente por momento del día (I)")
     # Cargar datos
     data = load_data()
 
@@ -1187,7 +1188,7 @@ def page_momento_accidente():
     col4.plotly_chart(fig_dia_semana, use_container_width=True)
 
 def page_momento_accidente2():
-    st.title("Distribución accidente por momento del día")
+    st.title("Distribución accidente por momento del día (II)")
     # Cargar datos
     data = load_data()
 
