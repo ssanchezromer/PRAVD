@@ -29,12 +29,14 @@ def page_home():
         <h3 style="color:gray">Personas involucradas en accidentes gestionados por la Guardia Urbana en la ciudad de Barcelona</h3>
         <p>Personas involucradas en un accidente gestionado por la Guardia Urbana en la ciudad de Barcelona y que han sufrido algún tipo de lesión (herido leve, herido grave o muerte).
         Incluye descripción de la persona (conductor, pasajero o peatón), sexo, edad, vehículo asociado a la persona y si la causa ha sido del peatón.<br />
-        Hemos recopilado un total de 5 años en nuestro conjuntos de datos, del 2018 al 2022.<br /><br />
+        Hemos recopilado un total de 5 años en nuestro conjuntos de datos, del <b>2018 al 2022</b>.<br /><br />
         ¡Esperamos que encuentres la información interesante!</p>
         <a href="https://opendata-ajuntament.barcelona.cat/data/es/dataset/accidents-persones-gu-bcn" target="_blank" style="font-size: 10px">Fuente de datos</a>
         <p>&nbsp;</p>
     """, unsafe_allow_html=True)
-    # saber el número de expedientes, personas implicadas, años diferentes, número de distritos, número de barrios, número de calles
+
+    # saber el número de expedientes, personas implicadas, años diferentes,
+    # número de distritos, número de barrios, número de calles
     data = load_data()
     # get the total expedientes
     total_expedientes = data["Numero_expedient"].nunique()
@@ -58,17 +60,18 @@ def page_home():
     col6.metric(label="Calles", value=total_calles)
 
     # obtener numero de muertos, heridos graves, heridos leves, sanos, desconocidos
-    victimizacion_mapping = {"Ferit lleu: Amb assistència sanitària en lloc d'accident": "Herido leve",
-                             "Ferit lleu: Hospitalització fins a 24h": "Herido leve",
-                             "Ferit lleu: Rebutja assistència sanitària": "Herido leve",
-                             "Ferit greu: hospitalització superior a 24h": "Herido grave",
-                             "Mort (dins 24h posteriors accident)": "Muerto",
-                             "Mort (després de 24h posteriors accident)": "Muerto",
-                             "Mort natural": "Muerto",
-                             "Il.lès": "Sano",
-                             "Desconegut": "Desconocido",
-                             "Es desconeix": "Desconocido",
-                             }
+    victimizacion_mapping = {
+        "Ferit lleu: Amb assistència sanitària en lloc d'accident": "Herido leve",
+        "Ferit lleu: Hospitalització fins a 24h": "Herido leve",
+        "Ferit lleu: Rebutja assistència sanitària": "Herido leve",
+        "Ferit greu: hospitalització superior a 24h": "Herido grave",
+        "Mort (dins 24h posteriors accident)": "Muerto",
+        "Mort (després de 24h posteriors accident)": "Muerto",
+        "Mort natural": "Muerto",
+        "Il.lès": "Sano",
+        "Desconegut": "Desconocido",
+        "Es desconeix": "Desconocido",
+    }
 
     data["Descripcio_victimitzacio"] = data["Descripcio_victimitzacio"].map(victimizacion_mapping)
     # contar cuantos muertos, heridos graves, heridos leves, sanos, desconocidos hay
@@ -97,7 +100,8 @@ def create_bar_chart(data, años):
         x="accident_count_yearly",
         y="Desc_Tipus_vehicle_implicat",
         title=f"Evolución Temporal de Tipos de Vehículos Implicados en Accidentes ({años})",
-        labels={"Desc_Tipus_vehicle_implicat": "Tipo de Vehículo", "accident_count_yearly": "Número de Accidentes",
+        labels={"Desc_Tipus_vehicle_implicat": "Tipo de Vehículo",
+                "accident_count_yearly": "Número de Accidentes",
                 "NK_Any": "Año"},
         height=500,
         color="NK_Any",
@@ -140,8 +144,9 @@ def page_grafico_vehiculos():
     st.title("Tipos de Vehículos Implicados en Accidentes")
 
     st.markdown("""
-    Los tipos de vehículos más implicados en accidentes son: Moticicleta, Turismo, Ciclomotor y Furgoneta.<br />
-    Realizamos un gráfico de barras y uno de tarta para ver la distribución de los tipos de vehículos implicados en accidentes.<br />  
+    Los tipos de vehículos más implicados en accidentes son: Moticicleta, Turismo, Ciclomotor y Furgoneta.\n
+    Realizamos un gráfico de barras y uno de tarta para ver la distribución de los 
+    tipos de vehículos implicados en accidentes.\n  
     """)
 
 
