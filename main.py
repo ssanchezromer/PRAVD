@@ -661,14 +661,10 @@ def page_sexo():
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
 
-    # Obtener el sexo de la persona
+    # Obtener el sexo de la persona más implicada en accidentes
+    
 
-    st.markdown(f"""
-        Los tipos de vehículos más implicados en accidentes entre **:gray[{años}]** son: **:red[{str(top_vehicles)}]**.\n
-        (Núm. mínimo de vehículos implicados: **:gray[{selected_minAccidente}]**)\n\n
-        Realizamos un gráfico de barras y de tarta para ver la distribución de los 
-        tipos de vehículos implicados en accidentes.\n  
-        """)
+
 
 
     # Crear pie chart
