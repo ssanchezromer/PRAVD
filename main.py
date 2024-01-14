@@ -128,7 +128,8 @@ def create_pie_chart(data, años):
         title=f"Tipos de Vehículos Implicados en Accidentes ({años})",
         labels={"Desc_Tipus_vehicle_implicat": "Tipo de Vehículo"},
         height=500,
-        color_discrete_sequence=scale_color
+        color_discrete_sequence=scale_color,
+        width=800
     )
     fig.update_traces(insidetextfont=dict(color='white', size=16),
                       outsidetextfont=dict(color='gray', size=16))
