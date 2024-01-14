@@ -659,11 +659,6 @@ def page_sexo():
     selected_years = st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years)
 
     años = f"{data['NK_Any'].min()}-{data['NK_Any'].max()}"
-    
-    if selected_years[0] == selected_years[1]:
-        años = f"{selected_years[0]}"
-    else:
-        años = f"{selected_years[0]}-{selected_years[1]}"
 
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
@@ -678,6 +673,11 @@ def page_sexo():
 
     # Obtener sexo predominante (sex mapping)
     sex_predominant = filtered_data["Descripcio_sexe"].value_counts().index[0]
+
+    if selected_years[0] == selected_years[1]:
+        años = f"{selected_years[0]}"
+    else:
+        años = f"{selected_years[0]}-{selected_years[1]}"
 
     st.markdown(f"""
         El sexo predominante en accidentes entre **:gray[{años}]** es: **:red[{str(sex_predominant)}]**.\n
