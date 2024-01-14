@@ -655,6 +655,8 @@ def page_sexo():
     # Obtener la lista única de años en los datos
     available_years = sorted(data["NK_Any"].unique())
 
+    años = f"{data['NK_Any'].min()}-{data['NK_Any'].max()}"
+
     # Checkbox para seleccionar los años
     selected_years = st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years)
 
@@ -669,6 +671,13 @@ def page_sexo():
     sex_mapping = {"Home": "Hombre", "Dona": "Mujer", "Desconegut": "Desconocido"}
     filtered_data["Descripcio_sexe"] = filtered_data["Descripcio_sexe"].map(sex_mapping)
 
+    # Obtener sexo predominante
+    sex_predominant = filtered_data.groupby("Descripcio_sexe")["Descripcio_sexe"].transform("count").idxmax()
+
+    st.markdown(f"""
+        El sexo predominante en accidentes entre **:gray[{años}]** es: **:red[{str(sex_predominant)}]**.\n
+        Realizamos un gráfico de barras y de tarta para ver la distribución del genéro implicado en accidentes.\n  
+        """)
 
 
     # Crear pie chart
