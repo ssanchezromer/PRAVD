@@ -776,7 +776,7 @@ def page_edad():
 
 def page_histograma_edad():
 
-    st.title("Distribución de Accidentes por franjas de edad")
+    st.title("Distribución de Accidentes por edad y nº vehículos implicados")
 
     # Cargar datos
     data = load_data()
