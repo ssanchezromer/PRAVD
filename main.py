@@ -755,7 +755,7 @@ def page_edad():
                                                                                show_percentage)
     if len(selected_years) > 1:
         # Crear gráfica de líneas
-        fig_line = create_age_line_chart(data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
+        fig_line = create_age_line_chart(filtered_data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
                                          show_percentage)
         # Colocar las dos gráficas una al lado de la otra
         col1, col2 = st.columns(2)
