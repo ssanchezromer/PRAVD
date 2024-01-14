@@ -656,7 +656,7 @@ def page_sexo():
     available_years = sorted(data["NK_Any"].unique())
 
     # Checkbox para seleccionar los años
-    selected_years = st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years)
+    selected_years = sorted(st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years))
 
     años = f"{data['NK_Any'].min()}-{data['NK_Any'].max()}"
 
@@ -712,7 +712,7 @@ def page_personas():
     available_years = sorted(data["NK_Any"].unique())
 
     # Checkbox para seleccionar los años
-    selected_years = st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years)
+    selected_years = sorted(st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years))
 
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
