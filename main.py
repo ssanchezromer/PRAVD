@@ -671,8 +671,8 @@ def page_sexo():
     sex_mapping = {"Home": "Hombre", "Dona": "Mujer", "Desconegut": "Desconocido"}
     filtered_data["Descripcio_sexe"] = filtered_data["Descripcio_sexe"].map(sex_mapping)
 
-    # Obtener sexo predominante
-    sex_predominant = filtered_data.groupby("Descripcio_sexe")["Descripcio_sexe"].transform("count").idxmax()
+    # Obtener sexo predominante (sex mapping)
+    sex_predominant = filtered_data["Descripcio_sexe"].value_counts().index[0]
 
     st.markdown(f"""
         El sexo predominante en accidentes entre **:gray[{años}]** es: **:red[{str(sex_predominant)}]**.\n
