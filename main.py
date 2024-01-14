@@ -655,10 +655,10 @@ def page_sexo():
     # Obtener la lista única de años en los datos
     available_years = sorted(data["NK_Any"].unique())
 
-    años = f"{data['NK_Any'].min()}-{data['NK_Any'].max()}"
-
     # Checkbox para seleccionar los años
     selected_years = st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years)
+
+    años = f"{selected_years.min()}-{selected_years.max()}"
 
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
