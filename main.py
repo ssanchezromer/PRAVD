@@ -257,28 +257,8 @@ def create_sex_pie_chart(filtered_data, selected_years, show_percentage):
     return fig, pie_chart_colors, category_order_pie_chart
 
 
-def create_age_pie_chart(data, selected_years, show_percentage):
-    # Filtrar los datos por los años seleccionados
-    filtered_data = data[data["NK_Any"].isin(selected_years)]
+def create_age_pie_chart(filtered_data, selected_years, show_percentage):
 
-    # quitamos los nulos y valores vacios
-    filtered_data = filtered_data[filtered_data["Edat"] != "Desconegut"]
-    filtered_data = filtered_data[filtered_data["Edat"] != "-1"]
-    # drop na
-    filtered_data = filtered_data.dropna(subset=["Edat"])
-    # quitar categoria null de mis datos
-    filtered_data = filtered_data[filtered_data["Edat"].notnull()]
-
-    filtered_data["Edat"] = pd.to_numeric(filtered_data["Edat"],
-                                          errors="coerce")  # Intenta convertir a numérico, maneja errores como NaN
-
-
-    # Definir las categorías
-    bins = [-1, 24, 50, 75, 140]
-    labels = ["< 25", "25-50", "51-75", "> 75"]
-
-    # Crear una columna categórica
-    filtered_data["Franja_Edad"] = pd.cut(filtered_data["Edat"], bins=bins, labels=labels)
 
     # Crear gráfico de pie para mostrar la distribución porcentual de accidentes por sexo
     fig = px.pie(
@@ -489,21 +469,21 @@ def create_sex_line_chart(filtered_data, selected_years, pie_chart_colors, categ
     return fig_line
 
 
-def create_age_line_chart(data, selected_years, pie_chart_colors, category_order_pie_chart, show_percentage):
-    # Filtrar los datos por los años seleccionados
-    filtered_data = data[data["NK_Any"].isin(selected_years)]
-
-    filtered_data["NK_Any"] = filtered_data["NK_Any"].astype(str)
-
-    filtered_data["Edat"] = pd.to_numeric(filtered_data["Edat"],
-                                          errors="coerce")  # Intenta convertir a numérico, maneja errores como NaN
+def create_age_line_chart(filtered_data, selected_years, pie_chart_colors, category_order_pie_chart, show_percentage):
+    # # Filtrar los datos por los años seleccionados
+    # filtered_data = data[data["NK_Any"].isin(selected_years)]
+    #
+    # filtered_data["NK_Any"] = filtered_data["NK_Any"].astype(str)
+    #
+    # filtered_data["Edat"] = pd.to_numeric(filtered_data["Edat"],
+    #                                       errors="coerce")  # Intenta convertir a numérico, maneja errores como NaN
 
     # Definir las categorías
-    bins = [-1, 24, 50, 75, 140]
-    labels = ["< 25", "25-50", "51-75", "> 75"]
-
-    # Crear una columna categórica
-    filtered_data["Franja_Edad"] = pd.cut(filtered_data["Edat"], bins=bins, labels=labels)
+    # bins = [-1, 24, 50, 75, 140]
+    # labels = ["< 25", "25-50", "51-75", "> 75"]
+    #
+    # # Crear una columna categórica
+    # filtered_data["Franja_Edad"] = pd.cut(filtered_data["Edat"], bins=bins, labels=labels)
 
     # Agrupar por año y sexo para obtener el número total de implicados en accidentes
     total_involved = filtered_data.groupby(["NK_Any", "Franja_Edad"]).size().reset_index(name="Total Implicados")
@@ -658,8 +638,6 @@ def page_sexo():
     # Checkbox para seleccionar los años
     selected_years = sorted(st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years))
 
-    años = f"{data['NK_Any'].min()}-{data['NK_Any'].max()}"
-
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
 
@@ -751,8 +729,29 @@ def page_edad():
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
 
+    # Filtrar los datos por los años seleccionados
+    filtered_data = data[data["NK_Any"].isin(selected_years)]
+
+    # quitamos los nulos y valores vacios
+    filtered_data = filtered_data[filtered_data["Edat"] != "Desconegut"]
+    filtered_data = filtered_data[filtered_data["Edat"] != "-1"]
+    # drop na
+    filtered_data = filtered_data.dropna(subset=["Edat"])
+    # quitar categoria null de mis datos
+    filtered_data = filtered_data[filtered_data["Edat"].notnull()]
+
+    filtered_data["Edat"] = pd.to_numeric(filtered_data["Edat"],
+                                          errors="coerce")  # Intenta convertir a numérico, maneja errores como NaN
+
+    # Definir las categorías
+    bins = [-1, 24, 50, 75, 140]
+    labels = ["< 25", "25-50", "51-75", "> 75"]
+
+    # Crear una columna categórica
+    filtered_data["Franja_Edad"] = pd.cut(filtered_data["Edat"], bins=bins, labels=labels)
+
     # Crear pie chart
-    fig_pie, pie_chart_colors, category_order_pie_chart = create_age_pie_chart(data, sorted(selected_years),
+    fig_pie, pie_chart_colors, category_order_pie_chart = create_age_pie_chart(filtered_data, sorted(selected_years),
                                                                                show_percentage)
     if len(selected_years) > 1:
         # Crear gráfica de líneas
