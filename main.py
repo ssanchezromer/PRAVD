@@ -189,11 +189,11 @@ def page_grafico_vehiculos():
     top_vehicles = ", ".join(top_vehicles)
 
     st.markdown(f"""
-    Los tipos de vehículos más implicados en accidentes entre {años} son: **:red[{str(top_vehicles)}]**.\n
+    Los tipos de vehículos más implicados en accidentes entre **:red[{años}]** son: **:red[{str(top_vehicles)}]**.\n
+    (Núm. mínimo de vehículos implicados: **:red[{selected_minAccidente}]**)\n\n
     Realizamos un gráfico de barras y de tarta para ver la distribución de los 
     tipos de vehículos implicados en accidentes.\n  
     """)
-
 
 
     # Seleccionar columnas únicas
