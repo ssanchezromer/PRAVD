@@ -129,7 +129,6 @@ def create_pie_chart(data, años):
         labels={"Desc_Tipus_vehicle_implicat": "Tipo de Vehículo"},
         height=500,
         color_discrete_sequence=scale_color,
-        width=800
     )
     fig.update_traces(insidetextfont=dict(color='white', size=16),
                       outsidetextfont=dict(color='gray', size=16))
@@ -139,6 +138,12 @@ def create_pie_chart(data, años):
 
 def page_grafico_vehiculos():
     st.title("Tipos de Vehículos Implicados en Accidentes")
+
+    st.markdown("""
+    Los tipos de vehículos más implicados en accidentes son: Moticicleta, Turismo, Ciclomotor y Furgoneta.<br />
+    Realizamos un gráfico de barras y uno de tarta para ver la distribución de los tipos de vehículos implicados en accidentes.<br />  
+    """)
+
 
     # Cargar datos
     data = load_data()
