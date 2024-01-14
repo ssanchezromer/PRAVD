@@ -677,7 +677,7 @@ def page_sexo():
     if selected_years[0] == selected_years[1]:
         años = f"{selected_years[0]}"
     else:
-        años = f"{selected_years[0]}-{selected_years[1]}"
+        años = f"{selected_years[0]}-{selected_years[-1]}"
 
     st.markdown(f"""
         El sexo predominante en accidentes entre **:gray[{años}]** es: **:red[{str(sex_predominant)}]**.\n
