@@ -755,7 +755,7 @@ def page_edad():
     age_group = filtered_data["Franja_Edad"].value_counts().index[0]
 
     st.markdown(f"""La franja de edad que acumula más accidente entre
-     **:gray[{selected_years[0]}-{selected_years[-1]}]** es: **:red[{str(age_group)}]**.\n""")
+     **:gray[{selected_years[0]}-{selected_years[-1]}]** es la de **:red[{str(age_group)}] años**.\n""")
 
     # Crear pie chart
     fig_pie, pie_chart_colors, category_order_pie_chart = create_age_pie_chart(filtered_data, sorted(selected_years),
