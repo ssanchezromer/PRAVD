@@ -143,15 +143,6 @@ def create_pie_chart(data, años):
 def page_grafico_vehiculos():
     st.title("Tipos de Vehículos Implicados en Accidentes")
 
-    st.markdown("""
-    Los tipos de vehículos más implicados en accidentes son: **:red[Motocicleta, Turismo, Bicicleta y Ciclomotor]**.\n
-    Realizamos un gráfico de barras y uno de tarta para ver la distribución de los 
-    tipos de vehículos implicados en accidentes.\n  
-    """)
-
-    # añadir imagen de un podium con la motocicleta en primer lugar
-
-
 
     # Cargar datos
     data = load_data()
@@ -189,6 +180,19 @@ def page_grafico_vehiculos():
     # Agregar columna con el número de accidentes por categoría y año
     filtered_data["accident_count_yearly"] = filtered_data.groupby(["Desc_Tipus_vehicle_implicat", "NK_Any"])[
         "Desc_Tipus_vehicle_implicat"].transform("count")
+
+
+    # Capturar los 3 vehículos más implicados en accidentes
+    top_vehicles = filtered_data.groupby("Desc_Tipus_vehicle_implicat")["accident_count_yearly"].sum().sort_values(
+        ascending=False).head(3).index.tolist()
+
+    st.markdown(f"""
+    Los tipos de vehículos más implicados en accidentes son: **:red[{top_vehicles}]**.\n
+    Realizamos un gráfico de barras y de tarta para ver la distribución de los 
+    tipos de vehículos implicados en accidentes.\n  
+    """)
+
+
 
     # Seleccionar columnas únicas
     selected_columns = ["Desc_Tipus_vehicle_implicat", "NK_Any", "accident_count_yearly"]
