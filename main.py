@@ -144,10 +144,13 @@ def page_grafico_vehiculos():
     st.title("Tipos de Vehículos Implicados en Accidentes")
 
     st.markdown("""
-    Los tipos de vehículos más implicados en accidentes son: Moticicleta, Turismo, Ciclomotor y Furgoneta.\n
+    Los tipos de vehículos más implicados en accidentes son: <b>Motocicleta, Turismo, Bicicleta y Ciclomotor</b>.\n
     Realizamos un gráfico de barras y uno de tarta para ver la distribución de los 
     tipos de vehículos implicados en accidentes.\n  
     """)
+
+    # añadir imagen de un podium con la motocicleta en primer lugar
+
 
 
     # Cargar datos
