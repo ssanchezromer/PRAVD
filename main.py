@@ -185,6 +185,8 @@ def page_grafico_vehiculos():
     # Capturar los 3 vehículos más implicados en accidentes
     top_vehicles = filtered_data.groupby("Desc_Tipus_vehicle_implicat")["accident_count_yearly"].sum().sort_values(
         ascending=False).head(3).index.tolist()
+    # obtener el texto de los 3 vehículos más implicados en accidentes
+    top_vehicles = ", ".join(top_vehicles)
 
     st.markdown(f"""
     Los tipos de vehículos más implicados en accidentes son: **:red[{top_vehicles}]**.\n
