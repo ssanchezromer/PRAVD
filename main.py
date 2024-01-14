@@ -724,7 +724,7 @@ def page_edad():
     available_years = sorted(data["NK_Any"].unique())
 
     # Checkbox para seleccionar los años
-    selected_years = st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years)
+    selected_years = sorted(st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years))
 
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
@@ -749,6 +749,13 @@ def page_edad():
 
     # Crear una columna categórica
     filtered_data["Franja_Edad"] = pd.cut(filtered_data["Edat"], bins=bins, labels=labels)
+
+
+    # Obtener la franja más común
+    age_group = filtered_data["Franja_Edad"].value_counts().index[0]
+
+    st.markdown(f"""La franja de edad que acumula más accidente entre
+     **:gray[{selected_years[0]}-{selected_years[-1]}]** es: **:red[{str(age_group)}]**.\n""")
 
     # Crear pie chart
     fig_pie, pie_chart_colors, category_order_pie_chart = create_age_pie_chart(filtered_data, sorted(selected_years),
