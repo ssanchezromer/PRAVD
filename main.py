@@ -661,19 +661,23 @@ def page_sexo():
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
 
-    # Obtener el sexo de la persona más implicada en accidentes
-    
+    # Filtrar los datos por los años seleccionados
+    filtered_data = data[data["NK_Any"].isin(selected_years)]
 
+    filtered_data["NK_Any"] = filtered_data["NK_Any"].astype(str)
+
+    sex_mapping = {"Home": "Hombre", "Dona": "Mujer", "Desconegut": "Desconocido"}
+    filtered_data["Descripcio_sexe"] = filtered_data["Descripcio_sexe"].map(sex_mapping)
 
 
 
     # Crear pie chart
-    fig_pie, pie_chart_colors, category_order_pie_chart = create_sex_pie_chart(data, sorted(selected_years),
+    fig_pie, pie_chart_colors, category_order_pie_chart = create_sex_pie_chart(filtered_data, sorted(selected_years),
                                                                                show_percentage)
 
     if len(selected_years) > 1:
         # Crear gráfica de líneas
-        fig_line = create_sex_line_chart(data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
+        fig_line = create_sex_line_chart(filtered_data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
                                          show_percentage)
         # Colocar las dos gráficas una al lado de la otra
         col1, col2 = st.columns(2)
@@ -699,22 +703,16 @@ def page_personas():
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
 
-    # Filtrar los datos por los años seleccionados
-    filtered_data = data[data["NK_Any"].isin(selected_years)]
 
-    filtered_data["NK_Any"] = filtered_data["NK_Any"].astype(str)
-
-    sex_mapping = {"Home": "Hombre", "Dona": "Mujer", "Desconegut": "Desconocido"}
-    filtered_data["Descripcio_sexe"] = filtered_data["Descripcio_sexe"].map(sex_mapping)
 
 
     # Crear pie chart
-    fig_pie, pie_chart_colors, category_order_pie_chart = create_personas_pie_chart(filtered_data, sorted(selected_years),
+    fig_pie, pie_chart_colors, category_order_pie_chart = create_personas_pie_chart(data, sorted(selected_years),
                                                                                show_percentage)
 
     if len(selected_years) > 1:
         # Crear gráfica de líneas
-        fig_line = create_personas_line_chart(filtered_data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
+        fig_line = create_personas_line_chart(data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
                                          show_percentage)
         # Colocar las dos gráficas una al lado de la otra
         col1, col2 = st.columns(2)
