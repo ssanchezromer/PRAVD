@@ -19,7 +19,7 @@ scale_color = px.colors.qualitative.Pastel
 # Cargar datos desde el archivo CSV
 # @st.cache_data
 def load_data():
-    data = pd.read_csv("datos_combinados.csv", encoding='utf8', delimiter=';')
+    data = pd.read_csv("./datos_combinados.csv", encoding='utf8', delimiter=';')
     return data
 
 
