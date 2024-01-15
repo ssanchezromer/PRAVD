@@ -33,7 +33,7 @@ Decir que el conjunto de datos cuenta con licencia tipo Creative Commons Attribu
 
 Se han combinado varios ficheros csv de diferentes años (2018-2022) para poder realizar un estudio temporal. 
 Se han tenido que ajustar nombres de las columnas y adaptar los datos porque no tenían el mismo número de columnas.
-El conjunto de datos final está en la carpeta data y se llama "datos_combinados.csv".
+El conjunto de datos final está en la carpeta `data` y se llama `datos_combinados.csv`.
 
 ### Solución propuesta
 
@@ -47,13 +47,18 @@ https://ssanchezromer-pravd.streamlit.app/
 
 Si queremos ejecutarla en local debemos realizar los siguientes pasos:
 
-1) Descargar el código del programa que está en la carpeta code.
+1) Descargar el código del programa que está en la carpeta `code`.
 
-2) Ir a nuestra terminar y crear ennvironment.
+2) Ir a nuestra terminal y crear el environment.
 
-3) Instalar las librerías desde el fichero requirements.txt
+3) Instalar las librerías dentro de nuestro environment desde el fichero `requirements.txt`
+
+```python
+pip install -r requeriments.txt
+```
    
 4) Ejecutar la aplicación mediante el comando:
-
+   
+```python
    streamlit run main.py
-
+```
