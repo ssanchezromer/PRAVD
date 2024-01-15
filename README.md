@@ -55,7 +55,7 @@ Si queremos ejecutarla en local debemos realizar los siguientes pasos:
 3) Instalar las librerías dentro de nuestro environment desde el fichero `requirements.txt`
 
 ```python
-pip install -r requeriments.txt
+pip install -r requirements.txt
 ```
    
 4) Ejecutar la aplicación mediante el comando:
