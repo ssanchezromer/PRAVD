@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import time, os
+import time
 import threading
 import queue
 
@@ -19,14 +19,10 @@ scale_color = px.colors.qualitative.Pastel
 # Cargar datos desde el archivo CSV
 # @st.cache_data
 def load_data():
-    # obtener página desde donde se ejecuta el script
-    page = os.path.basename(__file__)
-    if page == "main.py":
-        # local
-        data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
-    else:
-        # online
-        data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
+    # local
+    # data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
+    # online
+    data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
 
     return data
 
