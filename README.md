@@ -61,5 +61,5 @@ pip install -r requirements.txt
 4) Ejecutar la aplicación mediante el comando:
    
 ```python
-   streamlit run main.py
+streamlit run main.py
 ```
