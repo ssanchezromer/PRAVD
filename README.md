@@ -16,6 +16,7 @@ Esta práctica está orientada a los siguientes objetivos:
 
 El conjunto de datos escogido contiene una relación de personas que han sufrido algún tipo de lesión (heridos leves, heridos graves o fallecidos) en un accidente gestionado por la Policía en la ciudad de Barcelona.
 Este dataset se puede encontrar en la página de Open Data BCN y concretamente en la siguiente dirección:
+
 https://opendata-ajuntament.barcelona.cat/data/es/dataset/accidentspersones-gu-bcn
 
 donde se pueden escoger varios ficheros de tipo csv desde los años 2010 al 2022.
