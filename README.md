@@ -1,6 +1,7 @@
 # Máster Ciencia de Datos de la UOC 
-## Visualización de Datos (Práctica parte II)
-### Sergio Sánchez Romero
+## Visualización de Datos (Práctica parte II) - Sergio Sánchez Romero
+
+### Introducción
 
 En esta segunda parte de la práctica, el alumno tendrá que desarrollar una visualización de datos que demuestre su conocimiento del campo, así como el uso de diferentes herramientas y técnicas, basadas en el conjunto de datos seleccionado y validado en la primera parte de la práctica.
 
