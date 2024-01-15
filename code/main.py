@@ -21,10 +21,13 @@ scale_color = px.colors.qualitative.Pastel
 def load_data():
     # obtener página desde donde se ejecuta el script
     page = os.path.basename(__file__)
-    print(page)
+    if page == "main.py":
+        # local
+        data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
+    else:
+        # online
+        data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
 
-    data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
-    #data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
     return data
 
 
