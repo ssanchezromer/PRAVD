@@ -3,13 +3,13 @@
 
 ### Introducción
 
-En esta segunda parte de la práctica, el alumno tendrá que desarrollar una visualización de datos que demuestre su conocimiento del campo, así como el uso de diferentes herramientas y técnicas, basadas en el conjunto de datos seleccionado y validado en la primera parte de la práctica.
+En esta segunda parte de la práctica, hemos tenido que desarrollar una visualización de datos que demuestre nuestro conocimiento del campo, así como el uso de diferentes herramientas y técnicas, basadas en el conjunto de datos seleccionado y validado en la primera parte de la práctica.
 
 Esta práctica está orientada a los siguientes objetivos:
 
 - Utilización de diversas herramientas avanzadas para la creación de visualizaciones.
 - Creación de un proyecto de visualización de datos con una estructura, diseño y contenido profesional.
-- Practicar  varios tipos de enfoques sobre las preguntas clave a responder.
+- Practicar varios tipos de enfoques sobre las preguntas clave a responder.
 - Comprender los elementos de interactividad que proporcionan valor a una visualización.
 
 
@@ -21,6 +21,7 @@ Este dataset se puede encontrar en la página de Open Data BCN y concretamente e
 https://opendata-ajuntament.barcelona.cat/data/es/dataset/accidentspersones-gu-bcn
 
 donde se pueden escoger varios ficheros de tipo csv desde los años 2010 al 2022.
+
 Estos datos tendrían el tercer nivel en el modelo de cinco estrellas de Open Data ya que corresponden a un formato estructurado abierto y es el mínimo recomendado para poder realizar una buena visualización.
 
 ![image](https://github.com/ssanchezromer/PRAVD/assets/122234525/b22e8a90-3e1e-4c46-904b-f15d3cb17873)
