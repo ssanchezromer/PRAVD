@@ -16,29 +16,35 @@ st.set_page_config(
 
 scale_color = px.colors.qualitative.Pastel
 
+# change between online (streamlit) and local (locahost)
+online = True
 
-
-# Cargar datos desde el archivo CSV
 # @st.cache_data
 def load_data():
-    # local
-    # data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
-    # online
-    data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
+    # Cargar datos desde el archivo CSV
+    if online:
+        # online
+        path_datos = "./data/datos_combinados.csv"
+
+    else:
+        # local
+        path_datos = "../data/datos_combinados.csv"
+
+    data = pd.read_csv(path_datos, encoding='utf8', delimiter=';')
 
     return data
 
 
 def page_home():
-    st.title("Práctica Visualización de Datos (parte II)")
+    #st.title("Práctica Visualización de Datos (parte II)")
 
     st.markdown("""
-        <h3 style="color:red">Personas involucradas en accidentes gestionados por la Guardia Urbana en la ciudad de Barcelona</h3>
-        <p>Personas involucradas en un accidente gestionado por la Guardia Urbana en la ciudad de Barcelona y que han sufrido algún tipo de lesión (herido leve, herido grave o muerte).
+        <h2 style="color:red; font-size: 44px;">Personas involucradas en accidentes gestionados por la Guardia Urbana en la ciudad de Barcelona</h2>
+        <p>A continuación mostraremos un estudio sobre las personas involucradas en un accidente gestionado por la Guardia Urbana en la ciudad de Barcelona y que han sufrido algún tipo de lesión (herido leve, herido grave o muerte).<br />
         Incluye descripción de la persona (conductor, pasajero o peatón), sexo, edad, vehículo asociado a la persona y si la causa ha sido del peatón.<br />
         Hemos recopilado un total de 5 años en nuestro conjuntos de datos, del <b>2018 al 2022</b>.<br /><br />
         ¡Esperamos que encuentres la información interesante!</p>
-        <a href="https://opendata-ajuntament.barcelona.cat/data/es/dataset/accidents-persones-gu-bcn" target="_blank" style="font-size: 12px">Fuente de datos</a>
+        <a href="https://opendata-ajuntament.barcelona.cat/data/es/dataset/accidents-persones-gu-bcn" target="_blank" style="font-size: 14px; color:F0F0F0">Fuente de datos</a>
         <p>&nbsp;</p>
     """, unsafe_allow_html=True)
 
@@ -54,10 +60,13 @@ def page_home():
                         }
                         </style>
                         """, unsafe_allow_html=True)
-    # online
-    set_png_as_page_bg('./code/accidente.jpg')
-    # local
-    # set_png_as_page_bg('accidente.jpg')
+
+    if online:
+        set_png_as_page_bg('./code/accidente.jpg')
+    else:
+        set_png_as_page_bg('accidente.jpg')
+
+
 def page_intro():
     st.title("Introducción")
     st.markdown("""
@@ -183,7 +192,7 @@ def create_pie_chart(data, años):
 
 
 def page_grafico_vehiculos():
-    st.title("Tipos de Vehículos Implicados en Accidentes")
+    st.title("Accidentes por Tipos de Vehículos Implicados")
 
 
     # Cargar datos
@@ -192,7 +201,7 @@ def page_grafico_vehiculos():
     # Slider de mínimo de accidentes
     selected_minAccidente = st.sidebar.slider("Seleccionar número mínimo de accidentes", min_value=1,
                                               max_value=data.groupby("Desc_Tipus_vehicle_implicat")[
-                                                  "Desc_Tipus_vehicle_implicat"].transform("count").max(), value=500)
+                                                  "Desc_Tipus_vehicle_implicat"].transform("count").max(), value=2200)
     show_all_years = st.sidebar.checkbox("Mostrar todos los años", value=True)
     color = "NK_Any"
     category_orders = {"NK_Any": sorted(data["NK_Any"].unique())}
@@ -218,6 +227,12 @@ def page_grafico_vehiculos():
 
     # Ordenar datos por el número de accidentes
     filtered_data = filtered_data.sort_values(by=["NK_Any", "accident_count"], ascending=[True, True])
+
+    # Poner un checkbox para mostrar los datos de sexo (muertos)
+    if st.sidebar.checkbox("Mostrar solo muertos", value=False):
+        # filtrar los datos que contiene la palabra "Mort"
+        filtered_data = filtered_data[filtered_data["Descripcio_victimitzacio"].str.contains("Mort")]
+
 
     # Agregar columna con el número de accidentes por categoría y año
     filtered_data["accident_count_yearly"] = filtered_data.groupby(["Desc_Tipus_vehicle_implicat", "NK_Any"])[
@@ -689,39 +704,52 @@ def page_sexo():
 
     filtered_data["NK_Any"] = filtered_data["NK_Any"].astype(str)
 
+
+    # Poner un checkbox para mostrar los datos de sexo (muertos)
+    if st.sidebar.checkbox("Mostrar solo muertos", value=False):
+        # filtrar los datos que contiene la palabra "Mort"
+        filtered_data = filtered_data[filtered_data["Descripcio_victimitzacio"].str.contains("Mort")]
+
+
     sex_mapping = {"Home": "Hombre", "Dona": "Mujer", "Desconegut": "Desconocido"}
     filtered_data["Descripcio_sexe"] = filtered_data["Descripcio_sexe"].map(sex_mapping)
 
-    # Obtener sexo predominante (sex mapping)
-    sex_predominant = filtered_data["Descripcio_sexe"].value_counts().index[0]
+    if len(filtered_data)>0:
+        # Obtener sexo predominante (sex mapping)
+        sex_predominant = filtered_data["Descripcio_sexe"].value_counts().index[0]
 
-    if selected_years[0] == selected_years[1]:
-        años = f"{selected_years[0]}"
+        if selected_years[0] == selected_years[1]:
+            años = f"{selected_years[0]}"
+        else:
+            años = f"{selected_years[0]}-{selected_years[-1]}"
+
+        st.markdown(f"""
+            El sexo predominante en accidentes entre **:gray[{años}]** es: **:red[{str(sex_predominant)}]**.\n
+            Realizamos un gráfico de barras y de tarta para ver la distribución del genéro implicado en accidentes.\n  
+            """)
+
+
+        # Crear pie chart
+        fig_pie, pie_chart_colors, category_order_pie_chart = create_sex_pie_chart(filtered_data, sorted(selected_years),
+                                                                                   show_percentage)
+
+        if len(selected_years) > 1:
+            # Crear gráfica de líneas
+            fig_line = create_sex_line_chart(filtered_data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
+                                             show_percentage)
+            # Colocar las dos gráficas una al lado de la otra
+            col1, col2 = st.columns(2)
+
+            col1.plotly_chart(fig_pie, use_container_width=True)
+            col2.plotly_chart(fig_line, use_container_width=True)
+        else:
+            if len(selected_years) == 1:
+                st.plotly_chart(fig_pie, use_container_width=True)
+
     else:
-        años = f"{selected_years[0]}-{selected_years[-1]}"
-
-    st.markdown(f"""
-        El sexo predominante en accidentes entre **:gray[{años}]** es: **:red[{str(sex_predominant)}]**.\n
-        Realizamos un gráfico de barras y de tarta para ver la distribución del genéro implicado en accidentes.\n  
-        """)
-
-
-    # Crear pie chart
-    fig_pie, pie_chart_colors, category_order_pie_chart = create_sex_pie_chart(filtered_data, sorted(selected_years),
-                                                                               show_percentage)
-
-    if len(selected_years) > 1:
-        # Crear gráfica de líneas
-        fig_line = create_sex_line_chart(filtered_data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
-                                         show_percentage)
-        # Colocar las dos gráficas una al lado de la otra
-        col1, col2 = st.columns(2)
-
-        col1.plotly_chart(fig_pie, use_container_width=True)
-        col2.plotly_chart(fig_line, use_container_width=True)
-    else:
-        if len(selected_years) == 1:
-            st.plotly_chart(fig_pie, use_container_width=True)
+        st.markdown(f"""
+                    No hay datos para mostrar con los filtros seleccionados.\n
+                    """)
 
 
 def page_personas():
@@ -738,36 +766,47 @@ def page_personas():
     # Radio para seleccionar entre porcentaje y valor real
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
 
+    # Poner un checkbox para mostrar los datos de sexo (muertos)
+    if st.sidebar.checkbox("Mostrar solo muertos", value=False):
+        # filtrar los datos que contiene la palabra "Mort"
+        data = data[data["Descripcio_victimitzacio"].str.contains("Mort")]
 
-    # Obtener cual es el tipo de persona predominante
-    personas_predominant = data["Descripcio_tipus_persona"].value_counts().index[0]
 
-    # Obtener la variable años
-    if selected_years[0] == selected_years[1]:
-        años = f"{selected_years[0]}"
+    if len(data)>0:
+        # Obtener cual es el tipo de persona predominante
+        personas_predominant = data["Descripcio_tipus_persona"].value_counts().index[0]
+
+        # Obtener la variable años
+        if selected_years[0] == selected_years[1]:
+            años = f"{selected_years[0]}"
+        else:
+            años = f"{selected_years[0]}-{selected_years[-1]}"
+
+
+
+        # Crear pie chart
+        fig_pie, pie_chart_colors, category_order_pie_chart = create_personas_pie_chart(data, sorted(selected_years),
+                                                                                   show_percentage)
+
+        if len(selected_years) > 0:
+            st.markdown(f"""El tipo de persona predominante en accidentes entre **:gray[{años}]** es: **:red[{str(personas_predominant)}]**.\n""")
+
+        if len(selected_years) > 1:
+            # Crear gráfica de líneas
+            fig_line = create_personas_line_chart(data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
+                                             show_percentage)
+            # Colocar las dos gráficas una al lado de la otra
+            col1, col2 = st.columns(2)
+
+            col1.plotly_chart(fig_pie, use_container_width=True)
+            col2.plotly_chart(fig_line, use_container_width=True)
+        else:
+            if len(selected_years) == 1:
+                st.plotly_chart(fig_pie, use_container_width=True)
     else:
-        años = f"{selected_years[0]}-{selected_years[-1]}"
-
-    # Crear pie chart
-    fig_pie, pie_chart_colors, category_order_pie_chart = create_personas_pie_chart(data, sorted(selected_years),
-                                                                               show_percentage)
-
-    if len(selected_years) > 0:
-        st.markdown(f"""El tipo de persona predominante en accidentes entre **:gray[{años}]** es: **:red[{str(personas_predominant)}]**.\n""")
-
-    if len(selected_years) > 1:
-        # Crear gráfica de líneas
-        fig_line = create_personas_line_chart(data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
-                                         show_percentage)
-        # Colocar las dos gráficas una al lado de la otra
-        col1, col2 = st.columns(2)
-
-        col1.plotly_chart(fig_pie, use_container_width=True)
-        col2.plotly_chart(fig_line, use_container_width=True)
-    else:
-        if len(selected_years) == 1:
-            st.plotly_chart(fig_pie, use_container_width=True)
-
+        st.markdown(f"""
+                    No hay datos para mostrar con los filtros seleccionados.\n
+                    """)
 def page_edad():
     st.title("Distribución de Accidentes por franjas de edad")
     # Cargar datos
@@ -803,29 +842,36 @@ def page_edad():
     # Crear una columna categórica
     filtered_data["Franja_Edad"] = pd.cut(filtered_data["Edat"], bins=bins, labels=labels)
 
+    # Poner un checkbox para mostrar los datos de sexo (muertos)
+    if st.sidebar.checkbox("Mostrar solo muertos", value=False):
+        # filtrar los datos que contiene la palabra "Mort"
+        filtered_data = filtered_data[filtered_data["Descripcio_victimitzacio"].str.contains("Mort")]
 
-    # Obtener la franja más común
-    age_group = filtered_data["Franja_Edad"].value_counts().index[0]
+    if len(filtered_data)>0:
+        # Obtener la franja más común
+        age_group = filtered_data["Franja_Edad"].value_counts().index[0]
 
-    st.markdown(f"""La franja de edad que acumula más accidente entre
-     **:gray[{selected_years[0]}-{selected_years[-1]}]** es la de **:red[{str(age_group)}] años**.\n""")
+        st.markdown(f"""La franja de edad que acumula más accidente entre
+         **:gray[{selected_years[0]}-{selected_years[-1]}]** es la de **:red[{str(age_group)}] años**.\n""")
 
-    # Crear pie chart
-    fig_pie, pie_chart_colors, category_order_pie_chart = create_age_pie_chart(filtered_data, sorted(selected_years),
-                                                                               show_percentage)
-    if len(selected_years) > 1:
-        # Crear gráfica de líneas
-        fig_line = create_age_line_chart(filtered_data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
-                                         show_percentage)
-        # Colocar las dos gráficas una al lado de la otra
-        col1, col2 = st.columns(2)
+        # Crear pie chart
+        fig_pie, pie_chart_colors, category_order_pie_chart = create_age_pie_chart(filtered_data, sorted(selected_years),
+                                                                                   show_percentage)
 
-        col1.plotly_chart(fig_pie, use_container_width=True)
-        col2.plotly_chart(fig_line, use_container_width=True)
+        if len(selected_years) > 1:
+            # Crear gráfica de líneas
+            fig_line = create_age_line_chart(filtered_data, sorted(selected_years), pie_chart_colors, category_order_pie_chart,
+                                             show_percentage)
+            # Colocar las dos gráficas una al lado de la otra
+            col1, col2 = st.columns(2)
+
+            col1.plotly_chart(fig_pie, use_container_width=True)
+            col2.plotly_chart(fig_line, use_container_width=True)
+        else:
+            if len(selected_years) == 1:
+                st.plotly_chart(fig_pie, use_container_width=True)
     else:
-        if len(selected_years) == 1:
-            st.plotly_chart(fig_pie, use_container_width=True)
-
+        st.markdown(f"""No hay datos para mostrar con los filtros seleccionados.\n""")
 
 def page_histograma_edad():
 
@@ -866,49 +912,58 @@ def page_histograma_edad():
     filtered_data["Edat"] = pd.to_numeric(filtered_data["Edat"],
                                           errors="coerce")  # Intenta convertir a numérico, maneja errores como NaN
 
+    # Poner un checkbox para mostrar los datos de sexo (muertos)
+    if st.sidebar.checkbox("Mostrar solo muertos", value=False):
+        # filtrar los datos que contiene la palabra "Mort"
+        filtered_data = filtered_data[filtered_data["Descripcio_victimitzacio"].str.contains("Mort")]
+
     # obtener los años eleccionados en el multiselect
     selected_years = sorted(selected_years)
 
-    if len(selected_years)==0:
-        st.markdown("Seleccionar algun año para mostrar el histograma.")
-    else:
-        # obtener el año minimo y maximo
-        min_year = selected_years[0]
-        max_year = selected_years[-1]
-        # obtener el texto de años
-        if min_year == max_year:
-            años = f"{min_year}"
+    if len(filtered_data) > 0:
+
+        if len(selected_years) == 0:
+            st.markdown("Seleccionar algun año para mostrar el histograma.")
         else:
-            años = f"{min_year}-{max_year}"
+            # obtener el año minimo y maximo
+            min_year = selected_years[0]
+            max_year = selected_years[-1]
+            # obtener el texto de años
+            if min_year == max_year:
+                años = f"{min_year}"
+            else:
+                años = f"{min_year}-{max_year}"
 
-        st.markdown(f"""Mostramos la distribución de accidentes por edad entre **:gray[{años}]**.\n""")
+            st.markdown(f"""Mostramos la distribución de accidentes por edad entre **:gray[{años}]**.\n""")
 
 
-        # Crear un histograma interactivo con plotly
-        fig = px.histogram(
-            filtered_data,
-            x="Edat",
-            nbins=20,
-            title=f"Distribución de Accidentes por Edad en {años}",
-            labels={"Edat": "Edad", "count": "Frecuencia"},
-            color_discrete_sequence=scale_color,
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-        if len(selected_years)>1:
-            fig_evolution = px.histogram(
+            # Crear un histograma interactivo con plotly
+            fig = px.histogram(
                 filtered_data,
                 x="Edat",
                 nbins=20,
-                color="NK_Any",
-                title="Distribución de Accidentes por Edad en los años seleccionados",
-                facet_col="NK_Any",
-                labels={"Edat": "Edad", "count": "Frecuencia", "NK_Any": "Año"},
+                title=f"Distribución de Accidentes por Edad en {años}",
+                labels={"Edat": "Edad", "count": "Frecuencia"},
                 color_discrete_sequence=scale_color,
             )
+            st.plotly_chart(fig, use_container_width=True)
 
-            fig_evolution.update_xaxes(categoryorder="total ascending")
-            st.plotly_chart(fig_evolution, use_container_width=True)
+            if len(selected_years)>1:
+                fig_evolution = px.histogram(
+                    filtered_data,
+                    x="Edat",
+                    nbins=20,
+                    color="NK_Any",
+                    title="Distribución de Accidentes por Edad en los años seleccionados",
+                    facet_col="NK_Any",
+                    labels={"Edat": "Edad", "count": "Frecuencia", "NK_Any": "Año"},
+                    color_discrete_sequence=scale_color,
+                )
+
+                fig_evolution.update_xaxes(categoryorder="total ascending")
+                st.plotly_chart(fig_evolution, use_container_width=True)
+    else:
+        st.markdown(f"""No hay datos para mostrar con los filtros seleccionados.\n""")
 
     # def test_run():
     #     for x in range(1, max_vehicles + 1):
@@ -1024,6 +1079,60 @@ def page_mapa():
     # Mostrar el mapa
     st.plotly_chart(fig, use_container_width=True)
 
+    # generar mapa con solo muertos en accidentes: contiene la palabra "Mort"
+    filtered_data_muertos = filtered_data[filtered_data["Descripcio_victimitzacio"].str.contains("Mort")]
+
+    # crear una nueva columna con el numero de muertos por expediente
+    filtered_data_muertos["Muertos"] = filtered_data_muertos.groupby(["Numero_expedient"])["Numero_expedient"].transform("count")
+
+    # contar el número total de muertos en accidentes
+    total_muertos = filtered_data_muertos["Muertos"].sum()
+
+
+    # Agrupar por expediente
+    location_data_muertos = filtered_data_muertos.groupby(["Latitud", "Longitud"]).size().reset_index(name="Muertos")
+
+
+
+    # Definir una escala de colores personalizada
+    color_scale = [
+        [0, "green"],
+        [0.5, "orange"],
+        [1, "red"]
+    ]
+
+    # Crear el mapa
+    # Crear el mapa
+    fig = px.scatter_mapbox(
+        location_data_muertos,
+        lat="Latitud",
+        lon="Longitud",
+        hover_data=["Muertos"],
+        # Información adicional que se mostrará al pasar el ratón sobre los puntos
+        title=f"Muertes en Accidentes de Tráfico en Barcelona. Total = {total_muertos} personas",
+        labels={"Desc_Tipus_vehicle_implicat": "Tipo de Vehículo", "Vehículos Implicados": "Num. Vehículos"},
+        mapbox_style="carto-positron",  # Estilo del mapa (puedes elegir otros estilos)
+        height=600,
+        size="Muertos",
+        size_max=8,
+        opacity=0.7,
+        color="Muertos",  # Columna que se utilizará para la escala de colores
+        color_continuous_scale=color_scale
+    )
+
+    # Personalizar el diseño del mapa
+    fig.update_layout(
+        margin={"r": 0, "t": 40, "l": 0, "b": 0},  # Márgenes del mapa
+        mapbox={"zoom": 11, "center": {"lat": 41.3851, "lon": 2.1734}},  # Nivel de zoom inicial
+    )
+    fig.update_traces(
+        hovertemplate='Muertos: <b>%{customdata[0]}</b><extra></extra>'
+    )
+
+    # Mostrar el mapa
+    st.plotly_chart(fig, use_container_width=True)
+
+
 
 def page_distritos_barrios():
     st.title("Distribución accidente por distritos y barrios")
@@ -1037,6 +1146,13 @@ def page_distritos_barrios():
     selected_years = st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years)
 
     filtered_data = data[data["NK_Any"].isin(selected_years)]
+
+    texto = "accidentes"
+    # Poner un checkbox para mostrar los datos de sexo (muertos)
+    if st.sidebar.checkbox("Mostrar solo muertos", value=False):
+        # filtrar los datos que contiene la palabra "Mort"
+        filtered_data = filtered_data[filtered_data["Descripcio_victimitzacio"].str.contains("Mort")]
+        texto = "muertos"
 
     # agrupar por expediente
     filtered_data = filtered_data.groupby(["Numero_expedient"]).first().reset_index()
@@ -1100,7 +1216,7 @@ def page_distritos_barrios():
     col1, col2, col3 = st.columns(3)
 
     # show the average accidents by year, aligned to center
-    col1.metric(label="Media accidentes por año", value=total_accidents_by_year)
+    col1.metric(label=f"Media {texto} por año", value=total_accidents_by_year)
     # get the "Nom_carrer" with most accidents
     top_calle = filtered_data.groupby(["Nom_carrer"])["Numero_expedient"].nunique().nlargest(1)
     # get the "Nom_carrer" with most accidents
@@ -1109,7 +1225,7 @@ def page_distritos_barrios():
     calle = top_calle["Nom_carrer"].tolist()[0]
     numero_acc = top_calle["Numero_expedient"].tolist()[0]
     # show the "Nom_carrer" with most accidents
-    col1.metric(label="Calle con más accidentes (" + str(numero_acc) + ")", value=calle)
+    col1.metric(label=f"Calle con más {texto} ({str(numero_acc)})", value=calle)
     # sacar metrica de año con mas accidentes
     top_year = filtered_data.groupby(["NK_Any"])["Numero_expedient"].nunique().nlargest(1)
     # sacar metrica de año con mas accidentes
@@ -1118,7 +1234,7 @@ def page_distritos_barrios():
     year = top_year["NK_Any"].tolist()[0]
     numero_acc = top_year["Numero_expedient"].tolist()[0]
     # sacar metrica de año con mas accidentes
-    col1.metric(label="Año con más accidentes (" + str(numero_acc) + ")", value=year)
+    col1.metric(label=f"Año con más {texto} ({str(numero_acc)})", value=year)
     # sacar metrica de año con menos accidentes
     bottom_year = filtered_data.groupby(["NK_Any"])["Numero_expedient"].nunique().nsmallest(1)
     # sacar metrica de año con menos accidentes
@@ -1127,7 +1243,7 @@ def page_distritos_barrios():
     year = bottom_year["NK_Any"].tolist()[0]
     numero_acc = bottom_year["Numero_expedient"].tolist()[0]
     # sacar metrica de año con menos accidentes
-    col1.metric(label="Año con menos accidentes (" + str(numero_acc) + ")", value=year)
+    col1.metric(label=f"Año con menos {texto} ({str(numero_acc)})", value=year)
 
     # show the dataframe
     col2.markdown("""
@@ -1225,7 +1341,7 @@ def page_distritos_barrios():
 
 
 def page_momento_accidente():
-    st.title("Distribución accidente por momento del día (I)")
+    st.title("Distribución accidentes en el tiempo (I)")
     # Cargar datos
     data = load_data()
 
@@ -1337,7 +1453,7 @@ def page_momento_accidente():
     col4.plotly_chart(fig_dia_semana, use_container_width=True)
 
 def page_momento_accidente2():
-    st.title("Distribución accidente por momento del día (II)")
+    st.title("Distribución accidentes en el tiempo (II)")
     # Cargar datos
     data = load_data()
 
@@ -1507,16 +1623,17 @@ def main():
     pages = {
         "Inicio": page_home,
         "Introducción": page_intro,
-        "Vehículos Implicados en Accidentes": page_grafico_vehiculos,
         "Accidentes por Sexo": page_sexo,
         "Accidentes por Edad": page_histograma_edad,
         "Accidentes por Grupos de Edad": page_edad,
         "Accidentes por Tipos de Persona": page_personas,
+        "Accidentes por Tipos de Vehículos Implicados": page_grafico_vehiculos,
         "Mapa Accidentes": page_mapa,
         "Distritos y Barrios": page_distritos_barrios,
         "Momento del Accidente (I)": page_momento_accidente,
         "Momento del Accidente (II)": page_momento_accidente2,
         "Victimización": page_victimizacion,
+        #"Conclusiones": page_conclusiones,
     }
 
     # st.sidebar.title("Opciones de Visualización")
@@ -1553,6 +1670,7 @@ def main():
     if col2.button("Siguiente", key="forward") and index < len(pages) - 1:
         # estado_actual["index"] += 1
         index += 1
+
 
     # Cambiar la selección del selectbox según el índice actual
     selection = st.sidebar.selectbox("Seleccionar página", list(pages.keys()), index=index)
