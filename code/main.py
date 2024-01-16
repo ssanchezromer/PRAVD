@@ -22,9 +22,9 @@ scale_color = px.colors.qualitative.Pastel
 # @st.cache_data
 def load_data():
     # local
-    data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
+    # data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
     # online
-    # data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
+    data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
 
     return data
 
@@ -54,28 +54,44 @@ def page_home():
                         }
                         </style>
                         """, unsafe_allow_html=True)
+    # online
     set_png_as_page_bg('./code/accidente.jpg')
+    # local
+    # set_png_as_page_bg('accidente.jpg')
 def page_intro():
     st.title("Introducción")
     st.markdown("""
         <p>Presentamos las primeras filas de nuestro conjunto de datos y algunas métricas a tener en cuenta.</p>
     """, unsafe_allow_html=True)
 
+
     # saber el número de expedientes, personas implicadas, años diferentes,
     # número de distritos, número de barrios, número de calles
     data = load_data()
+
+    # Obtener la lista única de años en los datos
+    available_years = sorted(data["NK_Any"].unique())
+
+    # Checkbox para seleccionar los años
+    selected_years = sorted(st.sidebar.multiselect("Seleccionar Años", available_years, default=available_years))
+
+    # Filtrar los datos por los años seleccionados
+    filtered_data = data[data["NK_Any"].isin(selected_years)]
+
+    filtered_data["NK_Any"] = filtered_data["NK_Any"].astype(str)
+
     # get the total expedientes
-    total_expedientes = data["Numero_expedient"].nunique()
+    total_expedientes = filtered_data["Numero_expedient"].nunique()
     # get the total personas implicadas
-    total_personas_implicadas = data["Numero_expedient"].count()
+    total_personas_implicadas = filtered_data["Numero_expedient"].count()
     # get the total years
-    total_years = data["NK_Any"].nunique()
+    total_years = filtered_data["NK_Any"].nunique()
     # get the total distritos
-    total_distritos = data["Nom_districte"].nunique()
+    total_distritos = filtered_data["Nom_districte"].nunique()
     # get the total barrios
-    total_barrios = data["Nom_barri"].nunique()
+    total_barrios = filtered_data["Nom_barri"].nunique()
     # get the total calles
-    total_calles = data["Nom_carrer"].nunique()
+    total_calles = filtered_data["Nom_carrer"].nunique()
     # dividir en 6 columnas y mostrar los datos
     col1, col2, col3, col4, col5, col6 = st.columns(6)
     col1.metric(label="Años", value=total_years)
@@ -99,13 +115,13 @@ def page_intro():
         "Es desconeix": "Desconocido",
     }
 
-    data["Descripcio_victimitzacio"] = data["Descripcio_victimitzacio"].map(victimizacion_mapping)
+    filtered_data["Descripcio_victimitzacio"] = filtered_data["Descripcio_victimitzacio"].map(victimizacion_mapping)
     # contar cuantos muertos, heridos graves, heridos leves, sanos, desconocidos hay
-    cuantos_muertos = data[data["Descripcio_victimitzacio"] == "Muerto"].count()
-    cuantos_heridos_graves = data[data["Descripcio_victimitzacio"] == "Herido grave"].count()
-    cuantos_heridos_leves = data[data["Descripcio_victimitzacio"] == "Herido leve"].count()
-    cuantos_sanos = data[data["Descripcio_victimitzacio"] == "Sano"].count()
-    cuantos_desconocidos = data[data["Descripcio_victimitzacio"] == "Desconocido"].count()
+    cuantos_muertos = filtered_data[filtered_data["Descripcio_victimitzacio"] == "Muerto"].count()
+    cuantos_heridos_graves = filtered_data[filtered_data["Descripcio_victimitzacio"] == "Herido grave"].count()
+    cuantos_heridos_leves = filtered_data[filtered_data["Descripcio_victimitzacio"] == "Herido leve"].count()
+    cuantos_sanos = filtered_data[filtered_data["Descripcio_victimitzacio"] == "Sano"].count()
+    cuantos_desconocidos = filtered_data[filtered_data["Descripcio_victimitzacio"] == "Desconocido"].count()
     # dividir en 6 columnas y mostrar los datos
     col1, col2, col3, col4, col5, col6 = st.columns(6)
     col1.metric(label="Personas Implicadas", value=total_personas_implicadas)
@@ -117,7 +133,7 @@ def page_intro():
 
     # show head of the data
     # st.subheader("Primeras filas de los datos")
-    st.dataframe(data.head(10))
+    st.dataframe(filtered_data.head(10))
 
 
 def create_bar_chart(data, años):
