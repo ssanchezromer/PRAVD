@@ -4,6 +4,7 @@ import plotly.express as px
 import time
 import threading
 import queue
+import base64
 
 # Configuración de la página
 st.set_page_config(
@@ -16,27 +17,48 @@ st.set_page_config(
 scale_color = px.colors.qualitative.Pastel
 
 
+
 # Cargar datos desde el archivo CSV
 # @st.cache_data
 def load_data():
     # local
-    # data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
+    data = pd.read_csv("../data/datos_combinados.csv", encoding='utf8', delimiter=';')
     # online
-    data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
+    # data = pd.read_csv("./data/datos_combinados.csv", encoding='utf8', delimiter=';')
 
     return data
 
 
 def page_home():
     st.title("Práctica Visualización de Datos (parte II)")
+
     st.markdown("""
-        <h3 style="color:gray">Personas involucradas en accidentes gestionados por la Guardia Urbana en la ciudad de Barcelona</h3>
+        <h3 style="color:red">Personas involucradas en accidentes gestionados por la Guardia Urbana en la ciudad de Barcelona</h3>
         <p>Personas involucradas en un accidente gestionado por la Guardia Urbana en la ciudad de Barcelona y que han sufrido algún tipo de lesión (herido leve, herido grave o muerte).
         Incluye descripción de la persona (conductor, pasajero o peatón), sexo, edad, vehículo asociado a la persona y si la causa ha sido del peatón.<br />
         Hemos recopilado un total de 5 años en nuestro conjuntos de datos, del <b>2018 al 2022</b>.<br /><br />
         ¡Esperamos que encuentres la información interesante!</p>
-        <a href="https://opendata-ajuntament.barcelona.cat/data/es/dataset/accidents-persones-gu-bcn" target="_blank" style="font-size: 10px">Fuente de datos</a>
+        <a href="https://opendata-ajuntament.barcelona.cat/data/es/dataset/accidents-persones-gu-bcn" target="_blank" style="font-size: 12px">Fuente de datos</a>
         <p>&nbsp;</p>
+    """, unsafe_allow_html=True)
+
+    # ocultar sidebar y poner background image en en body
+    st.markdown("""
+                        <style>
+
+                        [data-testid="stSidebar"] {
+                            display: none
+                        }
+                        [data-testid="collapsedControl"] {
+                            display: none
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+    set_png_as_page_bg('accidente.jpg')
+def page_intro():
+    st.title("Introducción")
+    st.markdown("""
+        <p>Presentamos las primeras filas de nuestro conjunto de datos y algunas métricas a tener en cuenta.</p>
     """, unsafe_allow_html=True)
 
     # saber el número de expedientes, personas implicadas, años diferentes,
@@ -193,8 +215,9 @@ def page_grafico_vehiculos():
     top_vehicles = ", ".join(top_vehicles)
 
     st.markdown(f"""
-    Los tipos de vehículos más implicados en accidentes entre **:gray[{años}]** son: **:red[{str(top_vehicles)}]**.\n
-    (Núm. mínimo de vehículos implicados: **:gray[{selected_minAccidente}]**)\n\n
+    Los tipos de vehículos más implicados en accidentes entre **:gray[{años}]** son: **:red[{str(top_vehicles)}]**.\n""")
+    st.markdown(f"""<small>(Núm. mínimo de vehículos implicados: <span style="font-weight:'bold'; color: 'gray';">:gray[{selected_minAccidente}]</span>)""", unsafe_allow_html=True)
+    st.markdown(f"""
     Realizamos un gráfico de barras y de tarta para ver la distribución de los 
     tipos de vehículos implicados en accidentes.\n  
     """)
@@ -686,7 +709,7 @@ def page_sexo():
 
 
 def page_personas():
-    st.title("Distribución de Accidentes por tipos de persona")
+    st.title("Distribución de Accidentes por Tipos de Persona")
     # Cargar datos
     data = load_data()
 
@@ -700,11 +723,21 @@ def page_personas():
     show_percentage = st.sidebar.radio("Mostrar en:", ["Porcentaje", "Valor Real"]) == "Porcentaje"
 
 
+    # Obtener cual es el tipo de persona predominante
+    personas_predominant = data["Descripcio_tipus_persona"].value_counts().index[0]
 
+    # Obtener la variable años
+    if selected_years[0] == selected_years[1]:
+        años = f"{selected_years[0]}"
+    else:
+        años = f"{selected_years[0]}-{selected_years[-1]}"
 
     # Crear pie chart
     fig_pie, pie_chart_colors, category_order_pie_chart = create_personas_pie_chart(data, sorted(selected_years),
                                                                                show_percentage)
+
+    if len(selected_years) > 0:
+        st.markdown(f"""El tipo de persona predominante en accidentes entre **:gray[{años}]** es: **:red[{str(personas_predominant)}]**.\n""")
 
     if len(selected_years) > 1:
         # Crear gráfica de líneas
@@ -780,7 +813,7 @@ def page_edad():
 
 def page_histograma_edad():
 
-    st.title("Distribución de Accidentes por edad y nº vehículos implicados")
+    st.title("Distribución de Accidentes por edad")
 
     # Cargar datos
     data = load_data()
@@ -804,68 +837,116 @@ def page_histograma_edad():
 
     # Eliminar temporalmente los valores "Desconegut"
     filtered_data.loc[unknown_mask, "Edat"] = None
+    filtered_data = filtered_data.sort_values(by="NK_Any")
 
-    # Crear un histograma interactivo con plotly
-    fig = px.histogram(
-        filtered_data,
-        x="Edat",
-        nbins=20,
-        title="Distribución de Edades",
-        labels={"Edat": "Edad", "count": "Frecuencia"},
-        color_discrete_sequence=scale_color,
-    )
+    # quitamos los nulos y valores vacios
+    filtered_data = filtered_data[filtered_data["Edat"] != "Desconegut"]
+    filtered_data = filtered_data[filtered_data["Edat"] != "-1"]
+    # drop na
+    filtered_data = filtered_data.dropna(subset=["Edat"])
+    # quitar categoria null de mis datos
+    filtered_data = filtered_data[filtered_data["Edat"].notnull()]
 
-    def test_run():
-        for x in range(1, max_vehicles + 1):
-            time.sleep(1)
-            q.put(x)
+    filtered_data["Edat"] = pd.to_numeric(filtered_data["Edat"],
+                                          errors="coerce")  # Intenta convertir a numérico, maneja errores como NaN
 
-    q = queue.Queue()
-    is_exit_target_if_main_exits = True
-    threading.Thread(
-        target=test_run,
-        daemon=is_exit_target_if_main_exits).start()
+    # obtener los años eleccionados en el multiselect
+    selected_years = sorted(selected_years)
 
-    # Exit loop if we will not receive data within timeoutsec.
-    timeoutsec = 30
-
-    # creating a single-element container.
-    placeholder = st.empty()
-
-    # Simulate data from test_run() in placeholder.
-    while True:
-        try:
-            val = q.get(block=True, timeout=timeoutsec)
-        except queue.Empty:
-            break  # exit loop
+    if len(selected_years)==0:
+        st.markdown("Seleccionar algun año para mostrar el histograma.")
+    else:
+        # obtener el año minimo y maximo
+        min_year = selected_years[0]
+        max_year = selected_years[-1]
+        # obtener el texto de años
+        if min_year == max_year:
+            años = f"{min_year}"
         else:
-            with placeholder.container():
-                # # Filtrar los datos por el número de vehículos implicados
-                filtered_vehicles_data = filtered_data[
-                    filtered_data.groupby("Numero_expedient")["Numero_expedient"].
-                    transform("count").between(val, max_vehicles)]
-                unknown_mask2 = filtered_vehicles_data["Edat"] == "Desconegut"
-                unknown_values2 = filtered_vehicles_data.loc[unknown_mask2, "Edat"]
+            años = f"{min_year}-{max_year}"
 
-                # Eliminar temporalmente los valores "Desconegut"
-                filtered_vehicles_data.loc[unknown_mask2, "Edat"] = None
+        st.markdown(f"""Mostramos la distribución de accidentes por edad entre **:gray[{años}]**.\n""")
 
-                fig2 = px.histogram(
-                    filtered_vehicles_data,
-                    x="Edat",
-                    nbins=20,
-                    title=f"Distribución de Edades en Accidentes con {val}-{max_vehicles} Vehículos Implicados",
-                    labels={"Edat": "Edad", "count": "Frecuencia"},
-                    color_discrete_sequence=["coral"],
-                )
 
-                col1, col2 = st.columns(2)
-                col1.plotly_chart(fig, use_container_width=True)
-                col2.plotly_chart(fig2, use_container_width=True)
-                col2.metric(label="Nº min vehículos implicados", value=val)
-                q.task_done()
-                if val == max_vehicles - 1:
-                    break
+        # Crear un histograma interactivo con plotly
+        fig = px.histogram(
+            filtered_data,
+            x="Edat",
+            nbins=20,
+            title=f"Distribución de Accidentes por Edad en {años}",
+            labels={"Edat": "Edad", "count": "Frecuencia"},
+            color_discrete_sequence=scale_color,
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        if len(selected_years)>1:
+            fig_evolution = px.histogram(
+                filtered_data,
+                x="Edat",
+                nbins=20,
+                color="NK_Any",
+                title="Distribución de Accidentes por Edad en los años seleccionados",
+                facet_col="NK_Any",
+                labels={"Edat": "Edad", "count": "Frecuencia", "NK_Any": "Año"},
+                color_discrete_sequence=scale_color,
+            )
+
+            fig_evolution.update_xaxes(categoryorder="total ascending")
+            st.plotly_chart(fig_evolution, use_container_width=True)
+
+    # def test_run():
+    #     for x in range(1, max_vehicles + 1):
+    #         time.sleep(1)
+    #         q.put(x)
+    #
+    # q = queue.Queue()
+    # is_exit_target_if_main_exits = True
+    # threading.Thread(
+    #     target=test_run,
+    #     daemon=is_exit_target_if_main_exits).start()
+    #
+    # # Exit loop if we will not receive data within timeoutsec.
+    # timeoutsec = 30
+    #
+    # # creating a single-element container.
+    # placeholder = st.empty()
+    #
+    # # Simulate data from test_run() in placeholder.
+    # while True:
+    #     try:
+    #         val = q.get(block=True, timeout=timeoutsec)
+    #     except queue.Empty:
+    #         break  # exit loop
+    #     else:
+    #         with placeholder.container():
+    #             # # Filtrar los datos por el número de vehículos implicados
+    #             filtered_vehicles_data = filtered_data[
+    #                 filtered_data.groupby("Numero_expedient")["Numero_expedient"].
+    #                 transform("count").between(val, max_vehicles)]
+    #             unknown_mask2 = filtered_vehicles_data["Edat"] == "Desconegut"
+    #             unknown_values2 = filtered_vehicles_data.loc[unknown_mask2, "Edat"]
+    #
+    #             # Eliminar temporalmente los valores "Desconegut"
+    #             filtered_vehicles_data.loc[unknown_mask2, "Edat"] = None
+    #
+    #             fig2 = px.histogram(
+    #                 filtered_vehicles_data,
+    #                 x="Edat",
+    #                 nbins=20,
+    #                 title=f"Distribución de Edades en Accidentes con {val}-{max_vehicles} Vehículos Implicados",
+    #                 labels={"Edat": "Edad", "count": "Frecuencia"},
+    #                 color_discrete_sequence=["coral"],
+    #             )
+    #
+    #             col1, col2 = st.columns(2)
+    #             col1.plotly_chart(fig, use_container_width=True)
+    #             col2.plotly_chart(fig2, use_container_width=True)
+    #             col2.metric(label="Nº min vehículos implicados", value=val)
+    #             q.task_done()
+    #             if val == max_vehicles - 1:
+    #                 break
+
+
 
 
 def page_mapa():
@@ -1382,33 +1463,101 @@ def page_victimizacion():
         if len(selected_years) == 1:
             st.plotly_chart(fig_pie, use_container_width=True)
 
+@st.cache_resource
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+
+def set_png_as_page_bg(png_file):
+    bin_str = get_base64_of_bin_file(png_file)
+    page_bg_img = '''
+    <style>
+    section.main {
+    background-image: url("data:image/png;base64,%s") !important;
+    background-size: cover;
+    background-color: rgba(255, 255, 255, 0.5);
+    }
+    </style>
+    ''' % bin_str
+
+    st.markdown(page_bg_img, unsafe_allow_html=True)
+    return
+
+
 
 def main():
-    st.sidebar.title("Opciones de Visualización")
-
     pages = {
         "Inicio": page_home,
+        "Introducción": page_intro,
         "Vehículos Implicados en Accidentes": page_grafico_vehiculos,
         "Accidentes por Sexo": page_sexo,
-        "Accidentes por grupos de Edad": page_edad,
-        "Accidentes por edad y nº vehículos": page_histograma_edad,
-        "Accidentes por tipos de persona": page_personas,
-        "Mapa accidentes": page_mapa,
-        "Distritos y barrios": page_distritos_barrios,
-        "Momento del accidente (I)": page_momento_accidente,
-        "Momento del accidente (II)": page_momento_accidente2,
+        "Accidentes por Edad": page_histograma_edad,
+        "Accidentes por Grupos de Edad": page_edad,
+        "Accidentes por Tipos de Persona": page_personas,
+        "Mapa Accidentes": page_mapa,
+        "Distritos y Barrios": page_distritos_barrios,
+        "Momento del Accidente (I)": page_momento_accidente,
+        "Momento del Accidente (II)": page_momento_accidente2,
         "Victimización": page_victimizacion,
     }
 
-    selection = st.sidebar.selectbox("Seleccionar página", list(pages.keys()))
-    page = pages[selection]
+    # st.sidebar.title("Opciones de Visualización")
+    #
+    # selection = st.sidebar.selectbox("Seleccionar página", list(pages.keys()))
+    #
+    # page = pages[selection]
+    #
+    # for i in range(0, 5):
+    #     st.empty()
+    # # Mostrar la página seleccionada
+    # page()
 
-    for i in range(0, 5):
-        st.empty()
-    # Mostrar la página seleccionada
-    page()
+    st.sidebar.title("Opciones de Visualización")
 
+    # Actualizar el estado de la aplicación
+    # st.session_state.estado_actual = estado_actual
+    index = st.session_state.index
+
+    col1, _, _, _, _, _, col2 = st.columns(7)
+
+    # Crear botones para navegar hacia adelante y hacia atrás
+    if st.session_state.index == 0:
+        col1.empty()
+    else:
+        if col1.button("Anterior", key="back"):
+            # estado_actual["index"] -= 1
+            index -= 1
+    # if col1.button("Anterior", key="back") and estado_actual["index"] > 0:
+    # estado_actual["index"] -= 1
+
+
+    # if col2.button("Siguiente", key="forward") and estado_actual["index"] < len(pages) - 1:
+    if col2.button("Siguiente", key="forward") and index < len(pages) - 1:
+        # estado_actual["index"] += 1
+        index += 1
+
+    # Cambiar la selección del selectbox según el índice actual
+    selection = st.sidebar.selectbox("Seleccionar página", list(pages.keys()), index=index)
+
+
+
+
+    # Actualizar el estado de la aplicación
+    # st.session_state.estado_actual = estado_actual
+    st.session_state.index = index
+
+    # print(f"Estado actual: {estado_actual}")
+    # print(f"Session estado actual: {st.session_state.estado_actual}")
+
+    # Ejecutar la función de la página actual
+    pages[selection]()
 
 # Ejecutar la aplicación
 if __name__ == "__main__":
+    # Obtener el estado actual
+    if 'index' not in st.session_state:
+        st.session_state['index'] = 0
+    # estado_actual = st.session_state.get("estado_actual", {"index": 0})
     main()
