@@ -54,7 +54,7 @@ def page_home():
                         }
                         </style>
                         """, unsafe_allow_html=True)
-    set_png_as_page_bg('accidente.jpg')
+    set_png_as_page_bg('./code/accidente.jpg')
 def page_intro():
     st.title("Introducción")
     st.markdown("""
